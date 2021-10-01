@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+
+ docker-mysql:
+   container_name: docker-mysql
+   image: mysql:latest
+   environment:
+     MYSQL_DATABASE: restaurantdb 
+     MYSQL_ROOT_PASSWORD: abc123
+   expose:
+     - 3306
+   ports:
+     - 3307:3306
+   networks:
+     - bank-network
+   restart: always
+
+ restaurant-api:
+   restart: on-failure
+   container_name: restaurant-api
+   build:
+     context: .
+     dockerfile: restaurant-api.dockerfile
+   image: restaurant-api:latest
+   expose:
+     - 8090
+   ports:
+     - 8090:8090
+   networks:
+     - bank-network
+   environment:
+     SPRING_DATASOURCE_URL: jdbc:mysql://docker-mysql:3306/restaurantdb
+   depends_on:
+     - docker-mysql
+
+networks:
+ bank-network:
+   driver: bridge
